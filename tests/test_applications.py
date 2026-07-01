@@ -119,3 +119,62 @@ def test_office_accepts_application(client: TestClient) -> None:
     body = response.json()
     assert body["decision"] == "accepted"
     assert body["status"] == "reviewed"
+
+
+def test_acceptance_closes_offer(client: TestClient) -> None:
+    cabinet = _register_and_login(client, "cab@i.fr", 100001)
+    replacer = _register_and_login(client, "rep@i.fr", 100002)
+    replacer_id = _me_id(client, replacer)
+    offer_id = _create_open_offer(client, cabinet)
+    client.post(f"/api/v1/offers/{offer_id}/apply", headers=replacer, json={})
+
+    client.patch(
+        f"/api/v1/offers/{offer_id}/applications/{replacer_id}",
+        headers=cabinet,
+        json={"decision": "accepted"},
+    )
+
+    open_offers = client.get("/api/v1/offers", headers=replacer).json()
+    assert all(o["offer_id"] != offer_id for o in open_offers)
+
+
+def test_acceptance_rejects_other_applications(client: TestClient) -> None:
+    cabinet = _register_and_login(client, "cab@i.fr", 100001)
+    first = _register_and_login(client, "first@i.fr", 100002)
+    second = _register_and_login(client, "second@i.fr", 100003)
+    first_id = _me_id(client, first)
+    offer_id = _create_open_offer(client, cabinet)
+    client.post(f"/api/v1/offers/{offer_id}/apply", headers=first, json={})
+    client.post(f"/api/v1/offers/{offer_id}/apply", headers=second, json={})
+
+    client.patch(
+        f"/api/v1/offers/{offer_id}/applications/{first_id}",
+        headers=cabinet,
+        json={"decision": "accepted"},
+    )
+
+    applications = client.get(
+        f"/api/v1/offers/{offer_id}/applications", headers=cabinet
+    ).json()
+    decisions = {app["user_id"]: app["decision"] for app in applications}
+    assert decisions[first_id] == "accepted"
+    other = next(uid for uid in decisions if uid != first_id)
+    assert decisions[other] == "rejected"
+
+
+def test_cannot_apply_to_closed_offer(client: TestClient) -> None:
+    cabinet = _register_and_login(client, "cab@i.fr", 100001)
+    first = _register_and_login(client, "first@i.fr", 100002)
+    first_id = _me_id(client, first)
+    offer_id = _create_open_offer(client, cabinet)
+    client.post(f"/api/v1/offers/{offer_id}/apply", headers=first, json={})
+    client.patch(
+        f"/api/v1/offers/{offer_id}/applications/{first_id}",
+        headers=cabinet,
+        json={"decision": "accepted"},
+    )
+
+    late = _register_and_login(client, "late@i.fr", 100004)
+    response = client.post(f"/api/v1/offers/{offer_id}/apply", headers=late, json={})
+
+    assert response.status_code == 409
