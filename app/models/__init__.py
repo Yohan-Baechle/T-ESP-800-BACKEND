@@ -9,11 +9,14 @@ from app.models.enums import (
     DocumentType,
     NursingOfficeStatus,
     OfferStatus,
+    PatientStatus,
+    TransmissionStatus,
     UserStatus,
 )
 from app.models.message import Conversation, Message
 from app.models.nursing_office import NursingOffice, belong
 from app.models.offer import Offer
+from app.models.patient import Patient, Transmission
 from app.models.user import Nurse, User
 
 __all__ = [
@@ -29,6 +32,8 @@ __all__ = [
     "offer_care",
     "Conversation",
     "Message",
+    "Patient",
+    "Transmission",
     "UserStatus",
     "DocumentType",
     "DocumentStatus",
@@ -36,4 +41,6 @@ __all__ = [
     "OfferStatus",
     "ApplicationStatus",
     "ApplicationDecision",
+    "PatientStatus",
+    "TransmissionStatus",
 ]

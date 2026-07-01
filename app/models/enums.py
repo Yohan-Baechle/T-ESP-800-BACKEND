@@ -69,3 +69,25 @@ class ApplicationDecision(enum.StrEnum):
     PENDING = "pending"
     ACCEPTED = "accepted"
     REJECTED = "rejected"
+
+
+class PatientStatus(enum.StrEnum):
+    """Statut d'un dossier patient (CDC F4.3 / F6.4).
+
+    - ACTIVE : dossier en cours de suivi.
+    - ANONYMIZED : données anonymisées (droit à l'oubli RGPD).
+    """
+
+    ACTIVE = "active"
+    ANONYMIZED = "anonymized"
+
+
+class TransmissionStatus(enum.StrEnum):
+    """État d'une transmission patient (CDC F4.3).
+
+    - ACTIVE : transmission consultable.
+    - EXPIRED : durée de conservation dépassée (purge RGPD 30j).
+    """
+
+    ACTIVE = "active"
+    EXPIRED = "expired"
