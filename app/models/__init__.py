@@ -1,5 +1,8 @@
+from app.models.application import Apply
 from app.models.document import Document
 from app.models.enums import (
+    ApplicationDecision,
+    ApplicationStatus,
     DocumentStatus,
     DocumentType,
     NursingOfficeStatus,
@@ -17,9 +20,12 @@ __all__ = [
     "NursingOffice",
     "belong",
     "Offer",
+    "Apply",
     "UserStatus",
     "DocumentType",
     "DocumentStatus",
     "NursingOfficeStatus",
     "OfferStatus",
+    "ApplicationStatus",
+    "ApplicationDecision",
 ]
