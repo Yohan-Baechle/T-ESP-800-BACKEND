@@ -1,19 +1,13 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from app.core.config import get_settings
+from app.routers import auth
 
-# Les routers seront inclus ici au fur et à mesure de leur implémentation.
-# Réf. structure officielle : https://fastapi.tiangolo.com/tutorial/bigger-applications/
-#
-# from .routers import (
-#     users, profils, documents, recherche, remplacements, communication,
-# )
-# from .internal import admin
-#
-# app.include_router(users.router)
-# app.include_router(profils.router)
-# app.include_router(documents.router)
-# app.include_router(recherche.router)
-# app.include_router(remplacements.router)
-# app.include_router(communication.router)
-# app.include_router(admin.router)
+settings = get_settings()
+
+app = FastAPI(title=settings.app_name)
+
+app.include_router(auth.router, prefix=settings.api_v1_prefix)
+
+# Routers à inclure au fur et à mesure de leur implémentation :
+# users, profils, documents, recherche, remplacements, communication, admin
