@@ -5,7 +5,9 @@ app = FastAPI()
 # Les routers seront inclus ici au fur et à mesure de leur implémentation.
 # Réf. structure officielle : https://fastapi.tiangolo.com/tutorial/bigger-applications/
 #
-# from .routers import users, profils, documents, recherche, remplacements, communication
+# from .routers import (
+#     users, profils, documents, recherche, remplacements, communication,
+# )
 # from .internal import admin
 #
 # app.include_router(users.router)
