@@ -58,6 +58,4 @@ async def upload_document(
 @router.get("", response_model=list[DocumentPublic])
 def list_documents(current: CurrentNurse, db: DbSession) -> list[Document]:
     """Liste les documents légaux de l'infirmier authentifié (CDC F1.2)."""
-    return list(
-        db.scalars(select(Document).where(Document.user_id == current.user_id))
-    )
+    return list(db.scalars(select(Document).where(Document.user_id == current.user_id)))
