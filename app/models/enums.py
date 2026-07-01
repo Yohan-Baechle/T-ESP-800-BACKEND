@@ -37,3 +37,16 @@ class NursingOfficeStatus(enum.StrEnum):
 
     ACTIVE = "active"
     INACTIVE = "inactive"
+
+
+class OfferStatus(enum.StrEnum):
+    """Statut d'une offre de remplacement (CDC F3.1 / F3.4).
+
+    - OPEN : offre publiée, ouverte aux candidatures.
+    - CLOSED : offre pourvue ou retirée.
+    - EXPIRED : offre dont la date de validité est dépassée.
+    """
+
+    OPEN = "open"
+    CLOSED = "closed"
+    EXPIRED = "expired"
