@@ -30,3 +30,10 @@ class DocumentStatus(enum.StrEnum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
+
+
+class NursingOfficeStatus(enum.StrEnum):
+    """Statut d'un cabinet infirmier (CDC F1.6)."""
+
+    ACTIVE = "active"
+    INACTIVE = "inactive"
