@@ -5,7 +5,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, status
 from geoalchemy2 import WKTElement
-from geoalchemy2.functions import ST_DWithin
+from geoalchemy2.functions import ST_Distance, ST_DWithin
 from sqlalchemy import select
 
 from app.core.auth import CurrentNurse
@@ -94,6 +94,8 @@ def list_open_offers(
             offer_care.c.care_id == care_id
         )
 
+    turnover_rank = Offer.estimated_turnover.desc().nulls_last()
+
     geo_params = (near_lat, near_lon, radius_km)
     if any(p is not None for p in geo_params):
         if any(p is None for p in geo_params):
@@ -102,9 +104,15 @@ def list_open_offers(
                 detail="near_lat, near_lon et radius_km sont requis ensemble.",
             )
         point = WKTElement(f"POINT({near_lon} {near_lat})", srid=4326)
-        query = query.join(
-            ContactInfo,
-            ContactInfo.nursing_office_id == Offer.nursing_office_id,
-        ).where(ST_DWithin(ContactInfo.location, point, radius_km * 1000))
+        query = (
+            query.join(
+                ContactInfo,
+                ContactInfo.nursing_office_id == Offer.nursing_office_id,
+            )
+            .where(ST_DWithin(ContactInfo.location, point, radius_km * 1000))
+            .order_by(ST_Distance(ContactInfo.location, point).asc(), turnover_rank)
+        )
+    else:
+        query = query.order_by(turnover_rank)
 
     return list(db.scalars(query))
