@@ -1,12 +1,13 @@
 import uuid
 
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from app.core.auth import CurrentNurse
 from app.dependencies import DbSession
 from app.models.application import Apply
 from app.models.enums import (
+    ApplicationDecision,
     ApplicationStatus,
     OfferStatus,
 )
@@ -121,6 +122,23 @@ def decide_application(
     application.decision_comment = payload.decision_comment
     application.status = ApplicationStatus.REVIEWED
     application.reviewed_by = current.user_id
+
+    if payload.decision == ApplicationDecision.ACCEPTED:
+        offer.status = OfferStatus.CLOSED
+        db.execute(
+            update(Apply)
+            .where(
+                Apply.offer_id == offer_id,
+                Apply.user_id != applicant_id,
+                Apply.decision == ApplicationDecision.PENDING,
+            )
+            .values(
+                decision=ApplicationDecision.REJECTED,
+                status=ApplicationStatus.REVIEWED,
+                reviewed_by=current.user_id,
+            )
+        )
+
     db.commit()
     db.refresh(application)
     return application
