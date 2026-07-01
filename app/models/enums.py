@@ -14,3 +14,19 @@ class UserStatus(enum.StrEnum):
     ACTIVE = "active"
     SUSPENDED = "suspended"
     DELETED = "deleted"
+
+
+class DocumentType(enum.StrEnum):
+    """Type de document légal exigé à l'inscription (CDC F1.2)."""
+
+    PROFESSIONAL_CARD = "professional_card"
+    RIB = "rib"
+    INSURANCE = "insurance"
+
+
+class DocumentStatus(enum.StrEnum):
+    """État de vérification d'un document légal (CDC F1.2 / F1.3)."""
+
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
