@@ -10,6 +10,7 @@ from sqlalchemy import select
 
 from app.core.auth import CurrentNurse
 from app.dependencies import DbSession
+from app.models.care import Care, offer_care
 from app.models.contact_info import ContactInfo
 from app.models.enums import OfferStatus
 from app.models.nursing_office import belong
@@ -37,6 +38,16 @@ def publish_offer(payload: OfferCreate, current: CurrentNurse, db: DbSession) ->
             detail="Vous n'êtes pas rattaché à ce cabinet.",
         )
 
+    if payload.care_ids:
+        known = db.scalars(
+            select(Care.care_id).where(Care.care_id.in_(payload.care_ids))
+        ).all()
+        if len(set(known)) != len(set(payload.care_ids)):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Un ou plusieurs types de soins sont inconnus.",
+            )
+
     offer = Offer(
         nursing_office_id=payload.nursing_office_id,
         start=payload.start,
@@ -47,6 +58,9 @@ def publish_offer(payload: OfferCreate, current: CurrentNurse, db: DbSession) ->
         created_by=current.user_id,
     )
     db.add(offer)
+    db.flush()
+    for care_id in set(payload.care_ids):
+        db.execute(offer_care.insert().values(offer_id=offer.offer_id, care_id=care_id))
     db.commit()
     db.refresh(offer)
     return offer
@@ -63,6 +77,7 @@ def list_open_offers(
     near_lat: Annotated[float | None, Query(ge=-90, le=90)] = None,
     near_lon: Annotated[float | None, Query(ge=-180, le=180)] = None,
     radius_km: Annotated[float | None, Query(gt=0)] = None,
+    care_id: Annotated[uuid.UUID | None, Query()] = None,
 ) -> list[Offer]:
     """Recherche les offres ouvertes selon des critères (CDC F2.1 / F2.3 / US-03)."""
     query = select(Offer).where(Offer.status == OfferStatus.OPEN)
@@ -74,6 +89,10 @@ def list_open_offers(
         query = query.where(Offer.estimated_turnover >= min_turnover)
     if nursing_office_id is not None:
         query = query.where(Offer.nursing_office_id == nursing_office_id)
+    if care_id is not None:
+        query = query.join(offer_care, offer_care.c.offer_id == Offer.offer_id).where(
+            offer_care.c.care_id == care_id
+        )
 
     geo_params = (near_lat, near_lon, radius_km)
     if any(p is not None for p in geo_params):
