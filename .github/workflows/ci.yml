@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: infirmo
+          POSTGRES_PASSWORD: infirmo
+          POSTGRES_DB: infirmo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U infirmo"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+psycopg://infirmo:infirmo@localhost:5432/infirmo
+      JWT_SECRET_KEY: ci-secret-key
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint (Ruff)
+        run: ruff check .
+
+      - name: Format check (Black)
+        run: black --check app tests alembic/env.py
+
+      - name: Security scan (Bandit)
+        run: bandit -r app -c pyproject.toml
+
+      - name: Run migrations
+        run: alembic upgrade head
+
+      - name: Tests (pytest)
+        run: pytest -q
