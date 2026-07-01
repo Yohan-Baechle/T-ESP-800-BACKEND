@@ -1,0 +1,23 @@
+[project]
+name = "infirmo-backend"
+version = "0.1.0"
+description = "Backend FastAPI du projet INFIRMO (T-ESP-800)"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
