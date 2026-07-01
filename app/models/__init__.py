@@ -11,6 +11,7 @@ from app.models.enums import (
     OfferStatus,
     UserStatus,
 )
+from app.models.message import Conversation, Message
 from app.models.nursing_office import NursingOffice, belong
 from app.models.offer import Offer
 from app.models.user import Nurse, User
@@ -26,6 +27,8 @@ __all__ = [
     "ContactInfo",
     "Care",
     "offer_care",
+    "Conversation",
+    "Message",
     "UserStatus",
     "DocumentType",
     "DocumentStatus",
