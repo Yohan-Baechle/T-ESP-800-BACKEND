@@ -1,4 +1,9 @@
-from fastapi import APIRouter, HTTPException, status
+import uuid
+from datetime import datetime
+from decimal import Decimal
+from typing import Annotated
+
+from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
 
 from app.core.auth import CurrentNurse
@@ -45,6 +50,22 @@ def publish_offer(payload: OfferCreate, current: CurrentNurse, db: DbSession) ->
 
 
 @router.get("", response_model=list[OfferPublic])
-def list_open_offers(current: CurrentNurse, db: DbSession) -> list[Offer]:
-    """Liste les offres ouvertes aux candidatures (CDC F3.2 / US-03)."""
-    return list(db.scalars(select(Offer).where(Offer.status == OfferStatus.OPEN)))
+def list_open_offers(
+    current: CurrentNurse,
+    db: DbSession,
+    start_after: Annotated[datetime | None, Query()] = None,
+    end_before: Annotated[datetime | None, Query()] = None,
+    min_turnover: Annotated[Decimal | None, Query(ge=0)] = None,
+    nursing_office_id: Annotated[uuid.UUID | None, Query()] = None,
+) -> list[Offer]:
+    """Recherche les offres ouvertes selon des critères (CDC F2.1 / US-03)."""
+    query = select(Offer).where(Offer.status == OfferStatus.OPEN)
+    if start_after is not None:
+        query = query.where(Offer.start >= start_after)
+    if end_before is not None:
+        query = query.where(Offer.end <= end_before)
+    if min_turnover is not None:
+        query = query.where(Offer.estimated_turnover >= min_turnover)
+    if nursing_office_id is not None:
+        query = query.where(Offer.nursing_office_id == nursing_office_id)
+    return list(db.scalars(query))
