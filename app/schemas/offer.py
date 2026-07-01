@@ -16,6 +16,7 @@ class OfferCreate(BaseModel):
     estimated_turnover: Decimal | None = Field(default=None, ge=0)
     description: str | None = None
     valid_till: datetime | None = None
+    care_ids: list[uuid.UUID] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _check_dates(self) -> "OfferCreate":
