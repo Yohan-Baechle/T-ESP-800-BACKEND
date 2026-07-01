@@ -50,3 +50,22 @@ class OfferStatus(enum.StrEnum):
     OPEN = "open"
     CLOSED = "closed"
     EXPIRED = "expired"
+
+
+class ApplicationStatus(enum.StrEnum):
+    """État d'une candidature à une offre (CDC F3.3).
+
+    - SUBMITTED : candidature déposée, en attente de traitement.
+    - REVIEWED : candidature traitée par le cabinet (voir décision).
+    """
+
+    SUBMITTED = "submitted"
+    REVIEWED = "reviewed"
+
+
+class ApplicationDecision(enum.StrEnum):
+    """Décision du cabinet sur une candidature (CDC F3.3 / US-04)."""
+
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
