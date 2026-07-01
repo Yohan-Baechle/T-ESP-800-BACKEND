@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
+from app.core.auth import CurrentNurse
 from app.core.security import (
     create_access_token,
     hash_password,
@@ -53,3 +54,9 @@ def login(payload: LoginRequest, db: DbSession) -> Token:
             detail="Identifiants invalides.",
         )
     return Token(access_token=create_access_token(str(nurse.user_id)))
+
+
+@router.get("/me", response_model=NursePublic)
+def read_current_nurse(current: CurrentNurse) -> Nurse:
+    """Retourne le profil de l'infirmier authentifié (US-01)."""
+    return current

@@ -52,3 +52,37 @@ def test_login_wrong_password_unauthorized(client: TestClient) -> None:
     )
 
     assert response.status_code == 401
+
+
+def _login_token(client: TestClient) -> str:
+    client.post("/api/v1/auth/register", json=VALID_PAYLOAD)
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"email": VALID_PAYLOAD["email"], "password": VALID_PAYLOAD["password"]},
+    )
+    return response.json()["access_token"]
+
+
+def test_me_with_valid_token_returns_profile(client: TestClient) -> None:
+    token = _login_token(client)
+
+    response = client.get(
+        "/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["email"] == VALID_PAYLOAD["email"]
+
+
+def test_me_without_token_unauthorized(client: TestClient) -> None:
+    response = client.get("/api/v1/auth/me")
+
+    assert response.status_code == 401
+
+
+def test_me_with_invalid_token_unauthorized(client: TestClient) -> None:
+    response = client.get(
+        "/api/v1/auth/me", headers={"Authorization": "Bearer garbage"}
+    )
+
+    assert response.status_code == 401
