@@ -25,6 +25,11 @@ def _test_database() -> Generator[None, None, None]:
         conn.execute(text(f'CREATE DATABASE "{TEST_DB_NAME}"'))
     admin.dispose()
 
+    setup = create_engine(TEST_DATABASE_URL, isolation_level="AUTOCOMMIT")
+    with setup.connect() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
+    setup.dispose()
+
     yield
 
     admin = create_engine(f"{_admin_url}/postgres", isolation_level="AUTOCOMMIT")

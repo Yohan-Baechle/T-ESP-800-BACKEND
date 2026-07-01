@@ -1,4 +1,5 @@
 from app.models.application import Apply
+from app.models.contact_info import ContactInfo
 from app.models.document import Document
 from app.models.enums import (
     ApplicationDecision,
@@ -21,6 +22,7 @@ __all__ = [
     "belong",
     "Offer",
     "Apply",
+    "ContactInfo",
     "UserStatus",
     "DocumentType",
     "DocumentStatus",

@@ -1,5 +1,6 @@
 from logging.config import fileConfig
 
+from geoalchemy2 import alembic_helpers
 from sqlalchemy import engine_from_config, pool
 
 import app.models  # noqa: F401
@@ -18,16 +19,16 @@ target_metadata = Base.metadata
 
 
 def include_object(obj, name, type_, reflected, compare_to) -> bool:
-    """Recette officielle Alembic pour ignorer les tables hors metadata.
+    """Filtre les objets pris en compte par l'autogénération.
 
-    Les tables réfléchies depuis la base mais absentes de nos modèles
-    (extensions PostGIS : tiger, topology, spatial_ref_sys...) ne doivent
-    pas être incluses dans l'autogénération.
-    Réf. https://alembic.sqlalchemy.org/en/latest/cookbook.html
+    - Ignore les tables réfléchies absentes de nos modèles (extensions
+      PostGIS : tiger, topology, spatial_ref_sys...). Réf. cookbook Alembic.
+    - Délègue à GeoAlchemy2 pour les objets spatiaux gérés automatiquement
+      (colonnes Geography, index GiST) afin d'éviter les doublons.
     """
     if type_ == "table" and reflected and compare_to is None:
         return False
-    return True
+    return alembic_helpers.include_object(obj, name, type_, reflected, compare_to)
 
 
 def run_migrations_offline() -> None:
@@ -38,6 +39,8 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         include_object=include_object,
+        render_item=alembic_helpers.render_item,
+        process_revision_directives=alembic_helpers.writer,
     )
 
     with context.begin_transaction():
@@ -57,6 +60,8 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             include_object=include_object,
+            render_item=alembic_helpers.render_item,
+            process_revision_directives=alembic_helpers.writer,
         )
 
         with context.begin_transaction():
