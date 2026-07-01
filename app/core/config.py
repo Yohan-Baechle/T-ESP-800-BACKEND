@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     storage_dir: str = "storage/documents"
     max_document_size_bytes: int = 5 * 1024 * 1024
 
+    # Conservation des données de santé (CDC F6.4)
+    transmission_retention_days: int = 30
+
 
 @lru_cache
 def get_settings() -> Settings:
