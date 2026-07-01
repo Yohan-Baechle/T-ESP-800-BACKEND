@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
+    # Documents légaux (CDC F1.2)
+    storage_dir: str = "storage/documents"
+    max_document_size_bytes: int = 5 * 1024 * 1024
+
 
 @lru_cache
 def get_settings() -> Settings:
