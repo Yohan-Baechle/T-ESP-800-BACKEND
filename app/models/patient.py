@@ -1,11 +1,12 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, Enum, ForeignKey, String, Text, func
+from sqlalchemy import Date, DateTime, Enum, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
+from app.core.encryption import EncryptedString
 from app.models.enums import PatientStatus, TransmissionStatus
 
 
@@ -24,7 +25,7 @@ class Patient(Base):
     last_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     first_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
-    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    note: Mapped[str | None] = mapped_column(EncryptedString, nullable=True)
     status: Mapped[PatientStatus] = mapped_column(
         Enum(PatientStatus, name="patient_status"), default=PatientStatus.ACTIVE
     )
@@ -54,7 +55,7 @@ class Transmission(Base):
     patient_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("patient.patient_id"), index=True
     )
-    text: Mapped[str] = mapped_column(Text)
+    text: Mapped[str] = mapped_column(EncryptedString)
     status: Mapped[TransmissionStatus] = mapped_column(
         Enum(TransmissionStatus, name="transmission_status"),
         default=TransmissionStatus.ACTIVE,

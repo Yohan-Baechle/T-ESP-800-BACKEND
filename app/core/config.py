@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     # Conservation des données de santé (CDC F6.4)
     transmission_retention_days: int = 30
 
+    # Chiffrement des données de santé au repos (CDC F6.2)
+    # Clé AES-256 encodée en base64 (32 octets). À définir en environnement.
+    encryption_key: str = "ZGV2LW9ubHktMzItYnl0ZS1rZXktY2hhbmdlLW1lISE="
+
 
 @lru_cache
 def get_settings() -> Settings:
