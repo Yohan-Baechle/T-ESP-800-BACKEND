@@ -15,8 +15,9 @@ REGISTER_PAYLOAD = {
 }
 
 
-def _auth_headers(client: TestClient) -> dict[str, str]:
+def _admin_headers(client: TestClient, promote_to_admin) -> dict[str, str]:
     client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
+    promote_to_admin(REGISTER_PAYLOAD["email"])
     response = client.post(
         "/api/v1/auth/login",
         json={
@@ -43,8 +44,10 @@ def _patient_with_transmission(
     return patient_id, transmission_id
 
 
-def test_purge_removes_expired(client: TestClient, db_session: Session) -> None:
-    headers = _auth_headers(client)
+def test_purge_removes_expired(
+    client: TestClient, db_session: Session, promote_to_admin
+) -> None:
+    headers = _admin_headers(client, promote_to_admin)
     _, transmission_id = _patient_with_transmission(client, headers)
     db_session.execute(
         update(Transmission).values(expires_at=datetime.now(UTC) - timedelta(days=1))
@@ -59,8 +62,10 @@ def test_purge_removes_expired(client: TestClient, db_session: Session) -> None:
     assert all(t.transmission_id != transmission_id for t in remaining)
 
 
-def test_purge_keeps_valid(client: TestClient, db_session: Session) -> None:
-    headers = _auth_headers(client)
+def test_purge_keeps_valid(
+    client: TestClient, db_session: Session, promote_to_admin
+) -> None:
+    headers = _admin_headers(client, promote_to_admin)
     _patient_with_transmission(client, headers)
 
     response = client.post("/api/v1/admin/purge-transmissions", headers=headers)
@@ -71,3 +76,21 @@ def test_purge_keeps_valid(client: TestClient, db_session: Session) -> None:
 
 def test_purge_requires_auth(client: TestClient) -> None:
     assert client.post("/api/v1/admin/purge-transmissions").status_code == 401
+
+
+def test_purge_forbidden_for_non_admin(client: TestClient) -> None:
+    client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
+    token = client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": REGISTER_PAYLOAD["email"],
+            "password": REGISTER_PAYLOAD["password"],
+        },
+    ).json()["access_token"]
+
+    response = client.post(
+        "/api/v1/admin/purge-transmissions",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 403

@@ -16,9 +16,17 @@ def test_register_returns_created_nurse(client: TestClient) -> None:
     assert response.status_code == 201
     body = response.json()
     assert body["email"] == VALID_PAYLOAD["email"]
-    assert body["status"] == "pending"
+    assert body["status"] == "active"
     assert "hashed_password" not in body
     assert "password" not in body
+
+
+def test_register_rejects_invalid_order_number(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/auth/register", json={**VALID_PAYLOAD, "order_number": 42}
+    )
+
+    assert response.status_code == 422
 
 
 def test_register_duplicate_email_conflicts(client: TestClient) -> None:
