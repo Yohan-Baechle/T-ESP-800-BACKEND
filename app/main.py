@@ -9,6 +9,7 @@ from app.routers import (
     cares,
     communication,
     documents,
+    health,
     me,
     nursing_offices,
     offers,
@@ -22,6 +23,7 @@ app = FastAPI(title=settings.app_name)
 
 app.add_middleware(AuditMiddleware)
 
+app.include_router(health.router)
 app.include_router(auth.router, prefix=settings.api_v1_prefix)
 app.include_router(profils.router, prefix=settings.api_v1_prefix)
 app.include_router(documents.router, prefix=settings.api_v1_prefix)
