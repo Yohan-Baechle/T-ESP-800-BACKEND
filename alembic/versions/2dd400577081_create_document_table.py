@@ -44,3 +44,5 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_document_user_id'), table_name='document')
     op.drop_table('document')
     # ### end Alembic commands ###
+    sa.Enum(name='document_status').drop(op.get_bind(), checkfirst=True)
+    sa.Enum(name='document_type').drop(op.get_bind(), checkfirst=True)

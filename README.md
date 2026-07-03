@@ -48,6 +48,12 @@ alembic upgrade head          # applique les migrations
 fastapi dev app/main.py       # serveur de développement
 ```
 
+Pour repartir d'une base de développement vierge :
+
+```bash
+alembic downgrade base && alembic upgrade head
+```
+
 ## Structure du projet
 
 ```

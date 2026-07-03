@@ -57,3 +57,5 @@ def downgrade() -> None:
     op.drop_table('transmission')
     op.drop_table('patient')
     # ### end Alembic commands ###
+    sa.Enum(name='transmission_status').drop(op.get_bind(), checkfirst=True)
+    sa.Enum(name='patient_status').drop(op.get_bind(), checkfirst=True)
