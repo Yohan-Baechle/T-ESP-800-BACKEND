@@ -6,9 +6,11 @@ from sqlalchemy import select
 
 from app.core.auth import CurrentNurse
 from app.core.config import get_settings
-from app.dependencies import DbSession
+from app.core.pagination import paginate
+from app.dependencies import DbSession, PaginationParams
 from app.models.enums import PatientStatus, TransmissionStatus
 from app.models.patient import Patient, Transmission
+from app.schemas.pagination import Page
 from app.schemas.patient import (
     PatientCreate,
     PatientPublic,
@@ -49,12 +51,13 @@ def create_patient(
     return patient
 
 
-@router.get("", response_model=list[PatientPublic])
-def list_patients(current: CurrentNurse, db: DbSession) -> list[Patient]:
+@router.get("", response_model=Page[PatientPublic])
+def list_patients(
+    current: CurrentNurse, db: DbSession, pagination: PaginationParams
+) -> Page[PatientPublic]:
     """Liste les dossiers patients actifs (CDC F4.3)."""
-    return list(
-        db.scalars(select(Patient).where(Patient.status == PatientStatus.ACTIVE))
-    )
+    query = select(Patient).where(Patient.status == PatientStatus.ACTIVE)
+    return paginate(db, query, pagination)
 
 
 @router.delete("/{patient_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -109,19 +112,19 @@ def create_transmission(
     return transmission
 
 
-@router.get("/{patient_id}/transmissions", response_model=list[TransmissionPublic])
+@router.get("/{patient_id}/transmissions", response_model=Page[TransmissionPublic])
 def list_transmissions(
-    patient_id: uuid.UUID, current: CurrentNurse, db: DbSession
-) -> list[Transmission]:
+    patient_id: uuid.UUID,
+    current: CurrentNurse,
+    db: DbSession,
+    pagination: PaginationParams,
+) -> Page[TransmissionPublic]:
     """Liste les transmissions actives et non expirées d'un patient (CDC F4.3)."""
     _get_active_patient(patient_id, db)
     now = datetime.now(UTC)
-    return list(
-        db.scalars(
-            select(Transmission).where(
-                Transmission.patient_id == patient_id,
-                Transmission.status == TransmissionStatus.ACTIVE,
-                Transmission.expires_at > now,
-            )
-        )
+    query = select(Transmission).where(
+        Transmission.patient_id == patient_id,
+        Transmission.status == TransmissionStatus.ACTIVE,
+        Transmission.expires_at > now,
     )
+    return paginate(db, query, pagination)

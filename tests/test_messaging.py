@@ -84,7 +84,8 @@ def test_send_and_list_messages_in_order(client: TestClient) -> None:
     response = client.get(f"/api/v1/conversations/{conv}/messages", headers=bob)
 
     assert response.status_code == 200
-    assert [m["content"] for m in response.json()] == ["Bonjour", "Salut"]
+    items = response.json()["items"]
+    assert [m["content"] for m in items] == ["Bonjour", "Salut"]
 
 
 def test_outsider_cannot_read_conversation(client: TestClient) -> None:

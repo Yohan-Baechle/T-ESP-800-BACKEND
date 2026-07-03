@@ -88,7 +88,7 @@ def test_office_lists_applications(client: TestClient) -> None:
     response = client.get(f"/api/v1/offers/{offer_id}/applications", headers=cabinet)
 
     assert response.status_code == 200
-    assert len(response.json()) == 1
+    assert response.json()["total"] == 1
 
 
 def test_non_member_cannot_list_applications(client: TestClient) -> None:
@@ -134,7 +134,7 @@ def test_acceptance_closes_offer(client: TestClient) -> None:
         json={"decision": "accepted"},
     )
 
-    open_offers = client.get("/api/v1/offers", headers=replacer).json()
+    open_offers = client.get("/api/v1/offers", headers=replacer).json()["items"]
     assert all(o["offer_id"] != offer_id for o in open_offers)
 
 
@@ -155,7 +155,7 @@ def test_acceptance_rejects_other_applications(client: TestClient) -> None:
 
     applications = client.get(
         f"/api/v1/offers/{offer_id}/applications", headers=cabinet
-    ).json()
+    ).json()["items"]
     decisions = {app["user_id"]: app["decision"] for app in applications}
     assert decisions[first_id] == "accepted"
     other = next(uid for uid in decisions if uid != first_id)

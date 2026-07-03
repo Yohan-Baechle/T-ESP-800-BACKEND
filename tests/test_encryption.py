@@ -75,4 +75,4 @@ def test_transmission_text_readable_through_api(client: TestClient) -> None:
         f"/api/v1/patients/{patient_id}/transmissions", headers=headers
     )
 
-    assert response.json()[0]["text"] == "Lisible via API"
+    assert response.json()["items"][0]["text"] == "Lisible via API"

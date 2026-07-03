@@ -65,7 +65,7 @@ def test_list_returns_open_offers(client: TestClient) -> None:
     response = client.get("/api/v1/offers", headers=headers)
 
     assert response.status_code == 200
-    assert len(response.json()) == 1
+    assert response.json()["total"] == 1
 
 
 def test_publish_for_foreign_office_forbidden(client: TestClient) -> None:

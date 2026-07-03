@@ -81,7 +81,7 @@ def test_search_within_radius_finds_offer(client: TestClient) -> None:
     )
 
     assert response.status_code == 200
-    assert len(response.json()) == 1
+    assert response.json()["total"] == 1
 
 
 def test_search_outside_radius_excludes_offer(client: TestClient) -> None:
@@ -95,7 +95,7 @@ def test_search_outside_radius_excludes_offer(client: TestClient) -> None:
         headers=headers,
     )
 
-    assert response.json() == []
+    assert response.json()["items"] == []
 
 
 def test_incomplete_geo_params_rejected(client: TestClient) -> None:

@@ -25,7 +25,7 @@ def test_requests_are_logged(client: TestClient) -> None:
     headers = _auth_headers(client)
     client.get("/api/v1/patients", headers=headers)
 
-    logs = client.get("/api/v1/admin/audit-logs", headers=headers).json()
+    logs = client.get("/api/v1/admin/audit-logs", headers=headers).json()["items"]
 
     assert any(entry["action"] == "http.request" for entry in logs)
 
@@ -43,7 +43,7 @@ def test_transmission_creation_is_audited(client: TestClient) -> None:
         json={"text": "Note"},
     )
 
-    logs = client.get("/api/v1/admin/audit-logs", headers=headers).json()
+    logs = client.get("/api/v1/admin/audit-logs", headers=headers).json()["items"]
 
     assert any(entry["action"] == "transmission.created" for entry in logs)
 
@@ -57,7 +57,7 @@ def test_anonymization_is_audited(client: TestClient) -> None:
     ).json()["patient_id"]
     client.delete(f"/api/v1/patients/{patient_id}", headers=headers)
 
-    logs = client.get("/api/v1/admin/audit-logs", headers=headers).json()
+    logs = client.get("/api/v1/admin/audit-logs", headers=headers).json()["items"]
 
     assert any(entry["action"] == "patient.anonymized" for entry in logs)
 
