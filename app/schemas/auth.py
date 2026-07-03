@@ -37,6 +37,7 @@ class LoginRequest(BaseModel):
 
     email: EmailStr
     password: str
+    otp_code: str | None = None
 
 
 class Token(BaseModel):
@@ -44,3 +45,16 @@ class Token(BaseModel):
 
     access_token: str
     token_type: str = "bearer"
+
+
+class TwoFactorSetup(BaseModel):
+    """Secret et URI de provisionnement pour activer la 2FA (CDC F1.4)."""
+
+    secret: str
+    provisioning_uri: str
+
+
+class TwoFactorCode(BaseModel):
+    """Code TOTP à usage unique fourni par l'utilisateur."""
+
+    otp_code: str = Field(min_length=6, max_length=6)

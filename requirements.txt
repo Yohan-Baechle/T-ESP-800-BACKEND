@@ -42,6 +42,7 @@ pydantic-extra-types==2.11.1
 pydantic-settings==2.14.2
 pydantic_core==2.46.4
 Pygments==2.20.0
+PyOTP==2.10.0
 python-dotenv==1.2.2
 python-jose==3.5.0
 python-multipart==0.0.32

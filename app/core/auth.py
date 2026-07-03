@@ -34,3 +34,16 @@ def get_current_nurse(
 
 
 CurrentNurse = Annotated[Nurse, Depends(get_current_nurse)]
+
+
+def require_admin(current: CurrentNurse) -> Nurse:
+    """Autorise uniquement les infirmiers administrateurs (CDC F6.5)."""
+    if not current.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès réservé aux administrateurs.",
+        )
+    return current
+
+
+CurrentAdmin = Annotated[Nurse, Depends(require_admin)]

@@ -71,3 +71,17 @@ def client(
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def promote_to_admin(db_session: Session):
+    """Promeut un utilisateur au rôle administrateur (par email)."""
+
+    def _promote(email: str) -> None:
+        db_session.execute(
+            text("UPDATE users SET is_admin = true WHERE email = :email"),
+            {"email": email},
+        )
+        db_session.commit()
+
+    return _promote

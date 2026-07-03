@@ -75,7 +75,7 @@ tests/                 # tests pytest (base de test isolée)
 
 | Préfixe | Domaine |
 | --- | --- |
-| `/api/v1/auth` | Inscription, connexion (JWT), profil courant |
+| `/api/v1/auth` | Inscription, connexion (JWT), 2FA (TOTP), profil courant |
 | `/api/v1/profiles` | Consultation et mise à jour du profil infirmier |
 | `/api/v1/documents` | Documents légaux (upload PDF, vérification Ordre) |
 | `/api/v1/nursing-offices` | Cabinets et leur localisation |
@@ -100,6 +100,9 @@ transmissions, journal d'audit) sont paginées via les paramètres `limit`
 ## Sécurité et conformité
 
 - **Authentification** JWT, mots de passe hachés (bcrypt).
+- **Double authentification (2FA)** TOTP optionnelle par utilisateur.
+- **Vérification Ordre Infirmiers** à l'inscription (activation du compte).
+- **Contrôle d'accès** : endpoints d'administration réservés aux administrateurs.
 - **Chiffrement au repos** AES-256-GCM des données de santé sensibles.
 - **RGPD** : conservation limitée des transmissions (30 jours), droit à
   l'oubli (anonymisation des dossiers patients).

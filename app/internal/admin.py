@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from sqlalchemy import select
 
-from app.core.auth import CurrentNurse
+from app.core.auth import CurrentAdmin
 from app.core.pagination import paginate
 from app.dependencies import DbSession, PaginationParams
 from app.models.audit_log import AuditLog
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 @router.get("/audit-logs", response_model=Page[AuditLogPublic])
 def list_audit_logs(
-    current: CurrentNurse, db: DbSession, pagination: PaginationParams
+    current: CurrentAdmin, db: DbSession, pagination: PaginationParams
 ) -> Page[AuditLogPublic]:
     """Consulte le journal d'audit, du plus récent au plus ancien (CDC F6.5)."""
     query = select(AuditLog).order_by(AuditLog.created_at.desc())
@@ -23,7 +23,7 @@ def list_audit_logs(
 
 
 @router.post("/purge-transmissions")
-def purge_transmissions(current: CurrentNurse, db: DbSession) -> dict[str, int]:
+def purge_transmissions(current: CurrentAdmin, db: DbSession) -> dict[str, int]:
     """Purge les transmissions expirées — conservation RGPD (CDC F6.4)."""
     deleted = purge_expired_transmissions(db)
     log_event(
