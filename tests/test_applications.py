@@ -20,7 +20,7 @@ def _register_and_login(
 
 
 def _me_id(client: TestClient, headers: dict[str, str]) -> str:
-    return client.get("/api/v1/profils/me", headers=headers).json()["user_id"]
+    return client.get("/api/v1/profiles/me", headers=headers).json()["user_id"]
 
 
 def _create_open_offer(client: TestClient, headers: dict[str, str]) -> str:
