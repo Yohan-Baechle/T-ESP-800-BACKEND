@@ -70,7 +70,7 @@ tests/                 # tests pytest (base de test isolée)
 | Préfixe | Domaine |
 | --- | --- |
 | `/api/v1/auth` | Inscription, connexion (JWT), profil courant |
-| `/api/v1/profils` | Consultation et mise à jour du profil infirmier |
+| `/api/v1/profiles` | Consultation et mise à jour du profil infirmier |
 | `/api/v1/documents` | Documents légaux (upload PDF, vérification Ordre) |
 | `/api/v1/nursing-offices` | Cabinets et leur localisation |
 | `/api/v1/offers` | Publication et recherche d'offres de remplacement |
@@ -78,7 +78,8 @@ tests/                 # tests pytest (base de test isolée)
 | `/api/v1/conversations` | Messagerie sécurisée entre professionnels |
 | `/api/v1/patients` | Dossiers patients et transmissions sécurisées |
 | `/api/v1/me` | Activité de l'utilisateur (candidatures, offres) |
-| `/api/v1/admin` | Journal d'audit |
+| `/api/v1/admin` | Journal d'audit, purge RGPD |
+| `/health`, `/health/ready` | Sondes de disponibilité (liveness / readiness) |
 
 ## Sécurité et conformité
 

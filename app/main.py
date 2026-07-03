@@ -14,7 +14,7 @@ from app.routers import (
     nursing_offices,
     offers,
     patients,
-    profils,
+    profiles,
 )
 
 settings = get_settings()
@@ -25,7 +25,7 @@ app.add_middleware(AuditMiddleware)
 
 app.include_router(health.router)
 app.include_router(auth.router, prefix=settings.api_v1_prefix)
-app.include_router(profils.router, prefix=settings.api_v1_prefix)
+app.include_router(profiles.router, prefix=settings.api_v1_prefix)
 app.include_router(documents.router, prefix=settings.api_v1_prefix)
 app.include_router(nursing_offices.router, prefix=settings.api_v1_prefix)
 app.include_router(offers.router, prefix=settings.api_v1_prefix)

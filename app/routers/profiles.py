@@ -6,7 +6,7 @@ from app.models.user import Nurse
 from app.schemas.auth import NursePublic
 from app.schemas.nurse import NurseUpdate
 
-router = APIRouter(prefix="/profils", tags=["profils"])
+router = APIRouter(prefix="/profiles", tags=["profiles"])
 
 
 @router.get("/me", response_model=NursePublic)

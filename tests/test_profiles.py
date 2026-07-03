@@ -25,7 +25,7 @@ def _auth_headers(client: TestClient) -> dict[str, str]:
 def test_get_profile_returns_current_nurse(client: TestClient) -> None:
     headers = _auth_headers(client)
 
-    response = client.get("/api/v1/profils/me", headers=headers)
+    response = client.get("/api/v1/profiles/me", headers=headers)
 
     assert response.status_code == 200
     assert response.json()["email"] == REGISTER_PAYLOAD["email"]
@@ -35,7 +35,7 @@ def test_patch_profile_updates_fields(client: TestClient) -> None:
     headers = _auth_headers(client)
 
     response = client.patch(
-        "/api/v1/profils/me",
+        "/api/v1/profiles/me",
         headers=headers,
         json={"last_name": "Nouveau", "replacement_nurse": True},
     )
@@ -50,7 +50,7 @@ def test_patch_profile_is_partial(client: TestClient) -> None:
     headers = _auth_headers(client)
 
     response = client.patch(
-        "/api/v1/profils/me", headers=headers, json={"last_name": "SeulChamp"}
+        "/api/v1/profiles/me", headers=headers, json={"last_name": "SeulChamp"}
     )
 
     body = response.json()
@@ -59,6 +59,6 @@ def test_patch_profile_is_partial(client: TestClient) -> None:
 
 
 def test_patch_profile_requires_auth(client: TestClient) -> None:
-    response = client.patch("/api/v1/profils/me", json={"last_name": "X"})
+    response = client.patch("/api/v1/profiles/me", json={"last_name": "X"})
 
     assert response.status_code == 401
