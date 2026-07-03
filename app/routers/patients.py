@@ -15,6 +15,7 @@ from app.schemas.patient import (
     TransmissionCreate,
     TransmissionPublic,
 )
+from app.services.audit import log_event
 
 settings = get_settings()
 
@@ -69,6 +70,9 @@ def anonymize_patient(
     patient.status = PatientStatus.ANONYMIZED
     patient.updated_by = current.user_id
     db.commit()
+    log_event(
+        "patient.anonymized", user_id=current.user_id, path=str(patient_id), db=db
+    )
 
 
 @router.post(
@@ -99,6 +103,9 @@ def create_transmission(
     db.add(transmission)
     db.commit()
     db.refresh(transmission)
+    log_event(
+        "transmission.created", user_id=current.user_id, path=str(patient_id), db=db
+    )
     return transmission
 
 

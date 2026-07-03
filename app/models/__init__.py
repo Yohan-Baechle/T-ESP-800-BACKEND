@@ -1,4 +1,5 @@
 from app.models.application import Apply
+from app.models.audit_log import AuditLog
 from app.models.care import Care, offer_care
 from app.models.contact_info import ContactInfo
 from app.models.document import Document
@@ -34,6 +35,7 @@ __all__ = [
     "Message",
     "Patient",
     "Transmission",
+    "AuditLog",
     "UserStatus",
     "DocumentType",
     "DocumentStatus",

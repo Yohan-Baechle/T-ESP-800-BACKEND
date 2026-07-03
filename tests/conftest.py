@@ -59,9 +59,14 @@ def db_session(_engine) -> Generator[Session, None, None]:
 
 
 @pytest.fixture
-def client(db_session: Session) -> Generator[TestClient, None, None]:
+def client(
+    db_session: Session, _engine, monkeypatch: pytest.MonkeyPatch
+) -> Generator[TestClient, None, None]:
     def override_get_db() -> Generator[Session, None, None]:
         yield db_session
+
+    test_session_factory = sessionmaker(bind=_engine, autoflush=False, autocommit=False)
+    monkeypatch.setattr("app.services.audit.SessionLocal", test_session_factory)
 
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
