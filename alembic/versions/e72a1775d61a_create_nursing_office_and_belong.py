@@ -44,3 +44,4 @@ def downgrade() -> None:
     op.drop_table('belong')
     op.drop_table('nursing_office')
     # ### end Alembic commands ###
+    sa.Enum(name='nursing_office_status').drop(op.get_bind(), checkfirst=True)
