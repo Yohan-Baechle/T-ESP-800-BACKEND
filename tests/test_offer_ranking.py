@@ -66,7 +66,7 @@ def test_geo_search_orders_by_distance(client: TestClient) -> None:
         "/api/v1/offers?near_lat=48.69&near_lon=6.18&radius_km=500", headers=headers
     )
 
-    ids = [o["offer_id"] for o in response.json()]
+    ids = [o["offer_id"] for o in response.json()["items"]]
     assert ids.index(nancy_offer) < ids.index(paris_offer)
 
 
@@ -78,5 +78,5 @@ def test_without_geo_orders_by_turnover_desc(client: TestClient) -> None:
 
     response = client.get("/api/v1/offers", headers=headers)
 
-    ids = [o["offer_id"] for o in response.json()]
+    ids = [o["offer_id"] for o in response.json()["items"]]
     assert ids.index(high) < ids.index(low)

@@ -100,8 +100,8 @@ def test_filter_offers_by_care(client: TestClient) -> None:
         headers=headers,
     )
 
-    assert len(with_pansement.json()) == 1
-    assert with_injection.json() == []
+    assert with_pansement.json()["total"] == 1
+    assert with_injection.json()["items"] == []
 
 
 def test_publish_offer_with_unknown_care_rejected(client: TestClient) -> None:

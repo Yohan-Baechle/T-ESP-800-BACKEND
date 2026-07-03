@@ -80,7 +80,7 @@ def test_list_transmissions_returns_active(client: TestClient) -> None:
     )
 
     assert response.status_code == 200
-    assert len(response.json()) == 1
+    assert response.json()["total"] == 1
 
 
 def test_expired_transmission_is_hidden(
@@ -102,7 +102,7 @@ def test_expired_transmission_is_hidden(
         f"/api/v1/patients/{patient_id}/transmissions", headers=headers
     )
 
-    assert response.json() == []
+    assert response.json()["items"] == []
 
 
 def test_anonymize_patient_removes_data(client: TestClient) -> None:
@@ -113,7 +113,7 @@ def test_anonymize_patient_removes_data(client: TestClient) -> None:
 
     assert delete.status_code == 204
     listing = client.get("/api/v1/patients", headers=headers)
-    assert all(p["patient_id"] != patient_id for p in listing.json())
+    assert all(p["patient_id"] != patient_id for p in listing.json()["items"])
 
 
 def test_anonymized_patient_not_accessible(client: TestClient) -> None:

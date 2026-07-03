@@ -9,13 +9,15 @@ from geoalchemy2.functions import ST_Distance, ST_DWithin
 from sqlalchemy import select
 
 from app.core.auth import CurrentNurse
-from app.dependencies import DbSession
+from app.core.pagination import paginate
+from app.dependencies import DbSession, PaginationParams
 from app.models.care import Care, offer_care
 from app.models.contact_info import ContactInfo
 from app.models.enums import OfferStatus
 from app.models.nursing_office import belong
 from app.models.offer import Offer
 from app.schemas.offer import OfferCreate, OfferPublic
+from app.schemas.pagination import Page
 
 router = APIRouter(prefix="/offers", tags=["offers"])
 
@@ -66,10 +68,11 @@ def publish_offer(payload: OfferCreate, current: CurrentNurse, db: DbSession) ->
     return offer
 
 
-@router.get("", response_model=list[OfferPublic])
+@router.get("", response_model=Page[OfferPublic])
 def list_open_offers(
     current: CurrentNurse,
     db: DbSession,
+    pagination: PaginationParams,
     start_after: Annotated[datetime | None, Query()] = None,
     end_before: Annotated[datetime | None, Query()] = None,
     min_turnover: Annotated[Decimal | None, Query(ge=0)] = None,
@@ -78,7 +81,7 @@ def list_open_offers(
     near_lon: Annotated[float | None, Query(ge=-180, le=180)] = None,
     radius_km: Annotated[float | None, Query(gt=0)] = None,
     care_id: Annotated[uuid.UUID | None, Query()] = None,
-) -> list[Offer]:
+) -> Page[OfferPublic]:
     """Recherche les offres ouvertes selon des critères (CDC F2.1 / F2.3 / US-03)."""
     query = select(Offer).where(Offer.status == OfferStatus.OPEN)
     if start_after is not None:
@@ -115,4 +118,4 @@ def list_open_offers(
     else:
         query = query.order_by(turnover_rank)
 
-    return list(db.scalars(query))
+    return paginate(db, query, pagination)

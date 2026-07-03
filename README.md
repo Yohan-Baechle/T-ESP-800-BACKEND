@@ -81,6 +81,16 @@ tests/                 # tests pytest (base de test isolée)
 | `/api/v1/admin` | Journal d'audit, purge RGPD |
 | `/health`, `/health/ready` | Sondes de disponibilité (liveness / readiness) |
 
+### Pagination
+
+Les listes volumineuses (offres, candidatures, messages, patients,
+transmissions, journal d'audit) sont paginées via les paramètres `limit`
+(1–100, défaut 20) et `offset`. La réponse est enveloppée :
+
+```json
+{ "items": [...], "total": 42, "limit": 20, "offset": 0 }
+```
+
 ## Sécurité et conformité
 
 - **Authentification** JWT, mots de passe hachés (bcrypt).

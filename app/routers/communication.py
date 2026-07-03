@@ -4,7 +4,8 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import or_, select
 
 from app.core.auth import CurrentNurse
-from app.dependencies import DbSession
+from app.core.pagination import paginate
+from app.dependencies import DbSession, PaginationParams
 from app.models.message import Conversation, Message
 from app.models.user import Nurse
 from app.schemas.message import (
@@ -13,6 +14,7 @@ from app.schemas.message import (
     MessageCreate,
     MessagePublic,
 )
+from app.schemas.pagination import Page
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 
@@ -105,16 +107,18 @@ def send_message(
     return message
 
 
-@router.get("/{conversation_id}/messages", response_model=list[MessagePublic])
+@router.get("/{conversation_id}/messages", response_model=Page[MessagePublic])
 def list_messages(
-    conversation_id: uuid.UUID, current: CurrentNurse, db: DbSession
-) -> list[Message]:
+    conversation_id: uuid.UUID,
+    current: CurrentNurse,
+    db: DbSession,
+    pagination: PaginationParams,
+) -> Page[MessagePublic]:
     """Liste les messages d'une conversation (CDC F4.1)."""
     _get_conversation_for_member(conversation_id, current.user_id, db)
-    return list(
-        db.scalars(
-            select(Message)
-            .where(Message.conversation_id == conversation_id)
-            .order_by(Message.created_at)
-        )
+    query = (
+        select(Message)
+        .where(Message.conversation_id == conversation_id)
+        .order_by(Message.created_at)
     )
+    return paginate(db, query, pagination)

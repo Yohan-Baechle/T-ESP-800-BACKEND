@@ -4,7 +4,8 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select, update
 
 from app.core.auth import CurrentNurse
-from app.dependencies import DbSession
+from app.core.pagination import paginate
+from app.dependencies import DbSession, PaginationParams
 from app.models.application import Apply
 from app.models.enums import (
     ApplicationDecision,
@@ -18,6 +19,7 @@ from app.schemas.application import (
     ApplicationDecisionUpdate,
     ApplicationPublic,
 )
+from app.schemas.pagination import Page
 
 router = APIRouter(prefix="/offers", tags=["applications"])
 
@@ -87,14 +89,18 @@ def apply_to_offer(
     return application
 
 
-@router.get("/{offer_id}/applications", response_model=list[ApplicationPublic])
+@router.get("/{offer_id}/applications", response_model=Page[ApplicationPublic])
 def list_applications(
-    offer_id: uuid.UUID, current: CurrentNurse, db: DbSession
-) -> list[Apply]:
+    offer_id: uuid.UUID,
+    current: CurrentNurse,
+    db: DbSession,
+    pagination: PaginationParams,
+) -> Page[ApplicationPublic]:
     """Liste les candidatures reçues pour une offre (CDC F3.3 / US-04)."""
     offer = _get_offer_or_404(offer_id, db)
     _require_office_member(offer.nursing_office_id, current.user_id, db)
-    return list(db.scalars(select(Apply).where(Apply.offer_id == offer_id)))
+    query = select(Apply).where(Apply.offer_id == offer_id)
+    return paginate(db, query, pagination)
 
 
 @router.patch(

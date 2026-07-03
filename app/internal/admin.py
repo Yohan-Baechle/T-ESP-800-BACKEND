@@ -1,28 +1,25 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from sqlalchemy import select
 
 from app.core.auth import CurrentNurse
-from app.dependencies import DbSession
+from app.core.pagination import paginate
+from app.dependencies import DbSession, PaginationParams
 from app.models.audit_log import AuditLog
 from app.schemas.audit import AuditLogPublic
+from app.schemas.pagination import Page
 from app.services.audit import log_event
 from app.services.purge import purge_expired_transmissions
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-@router.get("/audit-logs", response_model=list[AuditLogPublic])
+@router.get("/audit-logs", response_model=Page[AuditLogPublic])
 def list_audit_logs(
-    current: CurrentNurse,
-    db: DbSession,
-    limit: Annotated[int, Query(ge=1, le=500)] = 100,
-) -> list[AuditLog]:
+    current: CurrentNurse, db: DbSession, pagination: PaginationParams
+) -> Page[AuditLogPublic]:
     """Consulte le journal d'audit, du plus récent au plus ancien (CDC F6.5)."""
-    return list(
-        db.scalars(select(AuditLog).order_by(AuditLog.created_at.desc()).limit(limit))
-    )
+    query = select(AuditLog).order_by(AuditLog.created_at.desc())
+    return paginate(db, query, pagination)
 
 
 @router.post("/purge-transmissions")

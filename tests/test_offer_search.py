@@ -59,7 +59,7 @@ def test_filter_by_min_turnover(client: TestClient) -> None:
     response = client.get("/api/v1/offers?min_turnover=3500", headers=headers)
 
     assert response.status_code == 200
-    assert len(response.json()) == 2
+    assert response.json()["total"] == 2
 
 
 def test_filter_by_office(client: TestClient) -> None:
@@ -71,7 +71,7 @@ def test_filter_by_office(client: TestClient) -> None:
         f"/api/v1/offers?nursing_office_id={office_id}", headers=headers
     )
 
-    assert len(response.json()) == 1
+    assert response.json()["total"] == 1
 
 
 def test_filter_by_start_after_excludes_earlier(client: TestClient) -> None:
@@ -83,7 +83,7 @@ def test_filter_by_start_after_excludes_earlier(client: TestClient) -> None:
         "/api/v1/offers?start_after=2026-10-01T00:00:00Z", headers=headers
     )
 
-    assert response.json() == []
+    assert response.json()["items"] == []
 
 
 def test_negative_turnover_rejected(client: TestClient) -> None:
